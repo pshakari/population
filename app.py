@@ -19,10 +19,10 @@ def hello_world():
     dbname = environ.get("DBNAME")
     
     spark_session = SparkSession.builder.appName('population').getOrCreate()   
-    df = spark_session.read.format("jdbc").options(url=url,dbtable="population",driver="org.postgresql.Driver").load()
-    table = df.select('continent', 'sum(population) population').groupBy('continent').orderBy('population', ascending=False)
-    continents = table.select('continent').collect()
-    populationSum = table.select('population').collect()		
+    #df = spark_session.read.format("jdbc").options(url=url,dbtable="population",driver="org.postgresql.Driver").load()
+    #table = df.select('continent', 'sum(population) population').groupBy('continent').orderBy('population', ascending=False)
+    continents = []#table.select('continent').collect()
+    populationSum = []#table.select('population').collect()		
 		
     return render_template('chart.html', values=populationSum, labels=continents)
 
