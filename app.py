@@ -1,14 +1,36 @@
 from flask import Flask
+import sys
+import optparse
+import time
 from flask import Markup
 from flask import Flask
 from flask import render_template
+
+
 app = Flask(__name__)
 
-@app.route("/")
-def chart():
-labels = ["January","February","March","April","May","June","July","August"]
-values = [10,9,8,7,6,4,7,8]
-return render_template('chart.html', values=values, labels=labels)
+start = int(round(time.time()))
 
-if __name__ == "__main__":
-app.run(host='0.0.0.0', port=8080)
+@app.route("/")
+def hello_world():
+    server = environ.get("SERVER")
+    user = environ.get("USER")
+    password = environ.get("PASSWORD")
+    dbname = environ.get("DBNAME")
+    
+    spark_session = SparkSession.builder.appName('population').getOrCreate()   
+    df = spark_session.read.format("jdbc").options(url=url,dbtable="population",driver="org.postgresql.Driver").load()
+    table = df.select('continent', 'sum(population) population').groupBy('continent').orderBy('population', ascending=False)
+    continents = table.select('continent').collect()
+    populationSum = table.select('population').collect()		
+		
+    return render_template('chart.html', values=populationSum, labels=continents)
+
+if __name__ == '__main__':
+    parser = optparse.OptionParser(usage="python app.py -p ")
+    parser.add_option('-p', '--port', action='store', dest='port', help='The port to listen on.')
+    (args, _) = parser.parse_args()
+    if args.port == None:
+        print "Missing required argument: -p/--port"
+        sys.exit(1)
+    app.run(host='0.0.0.0', port=int(args.port), debug=False)
