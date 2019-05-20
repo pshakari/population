@@ -1,4 +1,4 @@
-# winemap
+# population
 
 Prerequisites:
 
